@@ -6,35 +6,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>육아휴직 급여 계산기</title>
 
-  <!-- ✅ 애드센스 코드 삽입 -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9242454727842289"
      crossorigin="anonymous"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 2rem;
-      background-color: #f9f9f9;
+      margin: 0;
+      background-color: #f4f4f4;
     }
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    h2 {
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      margin: 1rem auto;
       text-align: center;
-      margin-bottom: 1.5rem;
     }
-    label, input {
+    .modal {
       display: block;
-      width: 100%;
-      margin-bottom: 1rem;
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 400px;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .overlay {
+      display: block;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+    .close-btn {
+      text-align: right;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #999;
     }
     input[type="number"] {
+      width: 100%;
       padding: 0.5rem;
+      margin: 1rem 0;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
@@ -52,57 +72,89 @@
       font-weight: bold;
       text-align: center;
     }
+    .ad-section {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>육아휴직 급여 계산기</h2>
-    <label for="salary">육아휴직 전 평균 월급여 (원)</label>
-    <input type="number" id="salary" placeholder="예: 2500000" />
-    <button onclick="calculateSalary()">급여 계산하기</button>
-    <div class="result" id="result"></div>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="modal" id="calcModal">
+  <div class="close-btn" onclick="hideCalc()">✖</div>
+  <h3>육아휴직 급여 계산기</h3>
+
+  <div class="ad-section">
+    <!-- 애드센스 광고 (팝업 상단용) -->
+    <ins class="adsbygoogle"
+         style="display:block; text-align:center;"
+         data-ad-client="ca-pub-9242454727842289"
+         data-ad-slot="1088561203"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
   </div>
 
-  <!-- 광고 블록 -->
-  <ins class="adsbygoogle"
-     style="display:block; text-align:center; margin-top:2rem;"
-     data-ad-client="ca-pub-9242454727842289"
-     data-ad-slot="1234567890"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-  <script>
-       (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
+  <input type="number" id="salary" placeholder="평균 월급여 입력 (예: 2500000)" />
+  <button onclick="calculateSalary()">계산하기</button>
+  <div class="result" id="result"></div>
+</div>
 
-  <script>
-    function calculateSalary() {
-      const salary = parseInt(document.getElementById('salary').value);
-      const min = 700000;
+<div style="padding: 2rem;">
+  <div class="result" id="bottomResult"></div>
 
-      if (!salary || salary <= 0) {
-        document.getElementById('result').innerText = "올바른 월급여를 입력해주세요.";
-        return;
-      }
+  <div class="ad-section">
+    <!-- 애드센스 광고 (하단용) -->
+    <ins class="adsbygoogle"
+         style="display:block; text-align:center;"
+         data-ad-client="ca-pub-9242454727842289"
+         data-ad-slot="1088561203"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+</div>
 
-      function compute(amount, rate, max, months) {
-        let monthly = amount * rate;
-        if (monthly > max) monthly = max;
-        if (monthly < min) monthly = min;
-        return { monthly, total: monthly * months };
-      }
+<script>
+function hideCalc() {
+  document.getElementById("calcModal").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
+}
 
-      const m1 = compute(salary, 1.0, 2500000, 3); // 1~3개월
-      const m2 = compute(salary, 1.0, 2000000, 3); // 4~6개월
-      const m3 = compute(salary, 0.8, 1600000, 6); // 7~12개월
+function compute(amount, rate, max, months) {
+  const min = 700000;
+  let monthly = amount * rate;
+  if (monthly > max) monthly = max;
+  if (monthly < min) monthly = min;
+  return { monthly, total: monthly * months };
+}
 
-      const total = m1.total + m2.total + m3.total;
+function calculateSalary() {
+  const salary = parseInt(document.getElementById('salary').value);
+  if (!salary || salary <= 0) {
+    document.getElementById('result').innerText = "올바른 월급여를 입력해주세요.";
+    return;
+  }
+  const m1 = compute(salary, 1.0, 2500000, 3);
+  const m2 = compute(salary, 1.0, 2000000, 3);
+  const m3 = compute(salary, 0.8, 1600000, 6);
+  const total = m1.total + m2.total + m3.total;
 
-      document.getElementById('result').innerHTML =
-        `1~3개월: 월 ${m1.monthly.toLocaleString()}원<br>` +
-        `4~6개월: 월 ${m2.monthly.toLocaleString()}원<br>` +
-        `7~12개월: 월 ${m3.monthly.toLocaleString()}원<br><br>` +
-        `<strong>총 수령액: ${total.toLocaleString()}원</strong>`;
-    }
-  </script>
+  const resultHTML = `1~3개월: ${m1.monthly.toLocaleString()}원<br>` +
+    `4~6개월: ${m2.monthly.toLocaleString()}원<br>` +
+    `7~12개월: ${m3.monthly.toLocaleString()}원<br><br>` +
+    `<strong>총: ${total.toLocaleString()}원</strong>`;
+
+  document.getElementById('result').innerHTML = resultHTML;
+  document.getElementById('bottomResult').innerHTML = resultHTML;
+}
+</script>
+
 </body>
 </html>
