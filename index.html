@@ -8,48 +8,24 @@
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9242454727842289"
      crossorigin="anonymous"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       background-color: #f4f4f4;
+      padding: 2rem;
     }
-    .btn {
-      display: inline-block;
-      padding: 0.8rem 1.5rem;
-      background-color: #4CAF50;
-      color: white;
-      border-radius: 8px;
-      text-decoration: none;
-      margin: 1rem auto;
-      text-align: center;
-    }
-    .modal {
-      display: block;
-      position: fixed;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
+    .container {
       max-width: 400px;
-      background: white;
-      padding: 1.5rem;
+      margin: 0 auto;
+      background: #fff;
+      padding: 2rem;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .overlay {
-      display: block;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 999;
-    }
-    .close-btn {
-      text-align: right;
-      font-size: 1.2rem;
-      cursor: pointer;
-      color: #999;
+    h2 {
+      text-align: center;
     }
     input[type="number"] {
       width: 100%;
@@ -68,65 +44,86 @@
       cursor: pointer;
     }
     .result {
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       font-weight: bold;
       text-align: center;
     }
-    .ad-section {
-      margin: 1.5rem 0;
+
+    /* 광고 모달 */
+    .ad-modal, .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1000;
+    }
+    .overlay {
+      background: rgba(0, 0, 0, 0.6);
+    }
+    .ad-modal {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .ad-box {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      max-width: 350px;
+      width: 90%;
       text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.25);
+    }
+    .ad-close {
+      margin-top: 1rem;
+      cursor: pointer;
+      color: #4CAF50;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay"></div>
-
-<div class="modal" id="calcModal">
-  <div class="close-btn" onclick="hideCalc()">✖</div>
-  <h3>육아휴직 급여 계산기</h3>
-
-  <div class="ad-section">
-    <!-- 애드센스 광고 (팝업 상단용) -->
-    <ins class="adsbygoogle"
-         style="display:block; text-align:center;"
-         data-ad-client="ca-pub-9242454727842289"
-         data-ad-slot="1088561203"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </div>
-
+<div class="container">
+  <h2>육아휴직 급여 계산기</h2>
   <input type="number" id="salary" placeholder="평균 월급여 입력 (예: 2500000)" />
-  <button onclick="calculateSalary()">계산하기</button>
-  <div class="result" id="result"></div>
+  <button onclick="triggerAdModal()">계산하기</button>
+  <div class="result" id="result" style="display:none;"></div>
 </div>
 
-<div style="padding: 2rem;">
-  <div class="result" id="bottomResult"></div>
+<!-- 항상 노출되는 하단 광고 -->
+<div style="margin-top: 2rem; text-align: center;">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-9242454727842289"
+       data-ad-slot="1088561203"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</div>
 
-  <div class="ad-section">
-    <!-- 애드센스 광고 (하단용) -->
-    <ins class="adsbygoogle"
-         style="display:block; text-align:center;"
-         data-ad-client="ca-pub-9242454727842289"
-         data-ad-slot="1088561203"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+<!-- 광고 모달 구조 -->
+<div class="overlay" id="overlay"></div>
+<div class="ad-modal" id="adModal">
+  <div class="ad-box">
+    <p><strong>잠시만 기다려주세요...</strong></p>
+    <div style="margin: 1rem 0;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-9242454727842289"
+           data-ad-slot="1088561203"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+    <div class="ad-close" onclick="closeAdAndCalculate()">✖ 광고 닫기</div>
   </div>
 </div>
 
 <script>
-function hideCalc() {
-  document.getElementById("calcModal").style.display = "none";
-  document.getElementById("overlay").style.display = "none";
-}
-
 function compute(amount, rate, max, months) {
   const min = 700000;
   let monthly = amount * rate;
@@ -135,24 +132,31 @@ function compute(amount, rate, max, months) {
   return { monthly, total: monthly * months };
 }
 
-function calculateSalary() {
+function triggerAdModal() {
   const salary = parseInt(document.getElementById('salary').value);
   if (!salary || salary <= 0) {
-    document.getElementById('result').innerText = "올바른 월급여를 입력해주세요.";
+    alert("올바른 월급여를 입력해주세요.");
     return;
   }
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('adModal').style.display = 'flex';
+}
+
+function closeAdAndCalculate() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('adModal').style.display = 'none';
+
+  const salary = parseInt(document.getElementById('salary').value);
   const m1 = compute(salary, 1.0, 2500000, 3);
   const m2 = compute(salary, 1.0, 2000000, 3);
   const m3 = compute(salary, 0.8, 1600000, 6);
   const total = m1.total + m2.total + m3.total;
 
-  const resultHTML = `1~3개월: ${m1.monthly.toLocaleString()}원<br>` +
+  document.getElementById('result').style.display = 'block'; document.getElementById('result').innerHTML =
+    `1~3개월: ${m1.monthly.toLocaleString()}원<br>` +
     `4~6개월: ${m2.monthly.toLocaleString()}원<br>` +
     `7~12개월: ${m3.monthly.toLocaleString()}원<br><br>` +
     `<strong>총: ${total.toLocaleString()}원</strong>`;
-
-  document.getElementById('result').innerHTML = resultHTML;
-  document.getElementById('bottomResult').innerHTML = resultHTML;
 }
 </script>
 
