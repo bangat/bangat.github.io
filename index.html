@@ -147,17 +147,24 @@ function closeAdAndCalculate() {
   document.getElementById('adModal').style.display = 'none';
 
   const salary = parseInt(document.getElementById('salary').value);
+  if (!salary || isNaN(salary) || salary <= 0) {
+    document.getElementById('result').style.display = 'none';
+    return;
+  }
+
   const m1 = compute(salary, 1.0, 2500000, 3);
   const m2 = compute(salary, 1.0, 2000000, 3);
   const m3 = compute(salary, 0.8, 1600000, 6);
   const total = m1.total + m2.total + m3.total;
 
-  document.getElementById('result').style.display = 'block'; document.getElementById('result').innerHTML =
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').innerHTML =
     `1~3개월: ${m1.monthly.toLocaleString()}원<br>` +
     `4~6개월: ${m2.monthly.toLocaleString()}원<br>` +
     `7~12개월: ${m3.monthly.toLocaleString()}원<br><br>` +
     `<strong>총: ${total.toLocaleString()}원</strong>`;
 }
+
 </script>
 
 </body>
